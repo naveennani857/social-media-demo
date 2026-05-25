@@ -1,34 +1,46 @@
 package com.ultron.social_user_demo.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SocialUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
 
-    @OneToOne(mappedBy = "socialUser")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    //@JoinColumn(name = "social_profile_id")
     private SocialProfile socialProfile;
 
-    // CRITICAL: mappedBy tells Hibernate "the relationship is already handled by the 'user' field in the Post class"
-    @OneToMany(mappedBy = "socialUser") // need to provide the class which owns the relationship
-    /* @JoinColumn(name = "userId") can only be used in uni-directional relationship
-     * this is inefficient cause the hibernate first create the post then update the table with userId */
+    @OneToMany(mappedBy = "socialUser")
     private List<Post> posts = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER) // The default fetch type is lazy here we are explicitely changing the
+    //FetchType to Fetch the data along with the user data.
+    // If the 2 tables are huge then this will impact the performance
     @JoinTable(
-            name = "user_group",                                // name of the 3rd table
-            joinColumns = @JoinColumn(name = "user_id"),        // FK of this class
-            inverseJoinColumns = @JoinColumn(name = "group_id") // FK for the other class(group)
+            name = "user_group",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
     )
-    private Set<SocialGroup> socialGroup = new HashSet<>();
-
+    private Set<SocialGroup> groups = new HashSet<>();
 
     @Override
-    public int hashCode() {
-        return Objects.hash(userId);
+    public int hashCode(){
+        return Objects.hash(id);
+    }
+
+    public void setSocialProfile(SocialProfile socialProfile){
+        socialProfile.setUser(this);
+        this.socialProfile = socialProfile;
     }
 }

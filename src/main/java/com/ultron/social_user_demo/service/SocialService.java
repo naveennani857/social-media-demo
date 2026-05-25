@@ -1,9 +1,8 @@
 package com.ultron.social_user_demo.service;
 
 import com.ultron.social_user_demo.entities.SocialUser;
-import com.ultron.social_user_demo.repository.SocialUserRepository;
+import com.ultron.social_user_demo.repositories.SocialUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,5 +19,11 @@ public class SocialService {
 
     public SocialUser saveUser(SocialUser socialUser) {
         return socialUserRepository.save(socialUser);
+    }
+
+    public void deleteUser(Long userId) {
+        SocialUser socialUser = socialUserRepository.findById((userId))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        socialUserRepository.delete(socialUser);
     }
 }
